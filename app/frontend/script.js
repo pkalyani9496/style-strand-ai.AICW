@@ -362,15 +362,27 @@ function addHaircutCards(recommendations) {
 
     const imageWrap = document.createElement("div");
     imageWrap.className = "cut-image-wrap";
+    const referenceUnavailable = document.createElement("div");
+    referenceUnavailable.className = "cut-image-placeholder";
+    referenceUnavailable.textContent = "Reference photo unavailable in this deployment.";
     const image = document.createElement("img");
     image.className = "cut-image";
     image.alt = `${recommendation.name} reference hairstyle`;
     image.loading = "lazy";
-    image.src = recommendation.preview || currentResult.imageData;
+    if (recommendation.preview) {
+      image.addEventListener("error", () => {
+        image.remove();
+        imageWrap.prepend(referenceUnavailable);
+      }, { once: true });
+      image.src = recommendation.preview;
+      imageWrap.append(image);
+    } else {
+      imageWrap.append(referenceUnavailable);
+    }
     const number = document.createElement("span");
     number.className = "cut-number";
     number.textContent = String(index + 1).padStart(2, "0");
-    imageWrap.append(image, number);
+    imageWrap.append(number);
 
     const info = document.createElement("div");
     info.className = "cut-info";
@@ -387,8 +399,15 @@ function addHaircutCards(recommendations) {
     const preview = document.createElement("button");
     preview.type = "button";
     preview.className = "cut-preview-button";
-    preview.textContent = "Preview on my photo";
-    preview.addEventListener("click", () => showHaircutPreview(recommendation));
+    preview.textContent = recommendation.hairData
+      ? "Preview on my photo"
+      : "Preview unavailable";
+    preview.disabled = !recommendation.hairData;
+    if (recommendation.hairData) {
+      preview.addEventListener("click", () => showHaircutPreview(recommendation));
+    } else {
+      preview.title = "Reference hairstyle images are not included in this deployment.";
+    }
     info.append(meta, title, description, detail, preview);
     card.append(imageWrap, info);
     elements.haircutGrid.append(card);
