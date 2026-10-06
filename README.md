@@ -20,7 +20,7 @@ The condition screen is an AI image-model estimate, not a medical diagnosis. It 
 
 ## Runtime
 
-The Docker image uses Python 3.10 and the pinned packages in `requirements.txt`. It includes only the inference models required by the app; training datasets and training outputs are not included.
+The Docker image uses Python 3.10 and the pinned packages in `requirements.txt`. It includes the inference models required by the app and selected haircut reference images from `app/assets/haircut_references`; training datasets and training outputs are not included.
 
 To run locally with Docker:
 

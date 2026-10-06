@@ -551,7 +551,7 @@ def _load_preview_assets(image_path, _segmentation_model):
 
 def get_haircut_recommendations(hair_type, segmentation_model):
     recommendations = []
-    class_directory = ROOT_DIR / "datasets/hair_type_prepared/train" / hair_type
+    class_directory = ROOT_DIR / "app/assets/haircut_references" / hair_type
 
     for haircut in HAIRCUTS.get(hair_type, []):
         image_path = class_directory / haircut["image"]
