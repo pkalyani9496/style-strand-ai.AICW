@@ -1,0 +1,14 @@
+.conda/
+.git/
+.vscode/
+__pycache__/
+datasets/
+hair_loss/
+results/
+src/
+inspect_datasets.py
+*.py[cod]
+models/hair_presence_v2/best_hair_presence_v2.keras
+models/hair_segmentation/hair_segmentation_unet.keras
+models/hair_condition_gate/hair_condition_gate_v2.keras
+models/hair_disease/hair_disease_mobilenetv2.keras

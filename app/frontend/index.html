@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Style Strand AI</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="Style Strand AI home">
+          <span class="brand-mark">S</span>
+          <span class="brand-name">STYLE STRAND AI</span>
+        </a>
+        <nav class="topnav" aria-label="Main navigation">
+          <a class="active" href="#analysis">Analysis</a>
+          <a href="#cuts">Haircuts</a>
+          <a href="#hair-mapping">Hair map</a>
+          <a href="#color-studio">Color studio</a>
+          <a href="#diagnostics">Diagnostics &amp; analysis</a>
+        </nav>
+        <span class="privacy-note"><span class="privacy-dot"></span>Session-based analysis</span>
+      </header>
+
+      <main id="top">
+        <section class="intro-row">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-line"></span> THE STYLE STRAND AI EDIT</p>
+            <h1>Good hair days,<br /><em>your way.</em></h1>
+            <p class="intro-copy">A few ideas for your texture, a color to try, and room to find your own look.</p>
+          </div>
+          <div class="intro-stamp" aria-hidden="true">
+            <span class="stamp-top">CUT & COLOR</span>
+            <span class="stamp-center">made<br />personal</span>
+            <span class="stamp-bottom">STYLE STRAND / 01</span>
+          </div>
+        </section>
+
+        <section class="upload-stage" id="upload-stage">
+          <div class="upload-copy">
+            <span class="step-label">01 <span>START WITH A PHOTO</span></span>
+            <h2>Let’s get to know<br />your hair.</h2>
+            <p>Choose a clear photo with your hair visible. A front or three-quarter view works best.</p>
+            <div class="source-actions">
+              <label class="upload-button" for="photo-input"><span class="upload-icon">+</span><span id="upload-label">Choose a photo</span></label>
+              <button id="start-camera" class="camera-button" type="button"><span aria-hidden="true">◉</span> Live camera</button>
+            </div>
+            <input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" />
+            <p class="file-hint">JPG, PNG or WEBP · processed in this session</p>
+            <p id="upload-status" class="upload-status" role="status" aria-live="polite"></p>
+            <div id="camera-controls" class="camera-controls" hidden>
+              <button id="capture-camera" class="capture-button" type="button">Capture photo</button>
+              <button id="stop-camera" class="stop-camera" type="button">Cancel</button>
+            </div>
+            <p id="camera-status" class="camera-status" role="status" aria-live="polite"></p>
+          </div>
+          <div class="upload-visual">
+            <div class="photo-frame">
+              <div class="photo-corner top-left"></div><div class="photo-corner top-right"></div>
+              <div class="photo-corner bottom-left"></div><div class="photo-corner bottom-right"></div>
+              <div class="photo-placeholder" id="photo-placeholder">
+                <span class="placeholder-orbit"><span class="placeholder-plus">+</span></span>
+                <span class="placeholder-title">Your photo goes here</span>
+                <span class="placeholder-subtitle">A little detail makes all the difference</span>
+              </div>
+              <img id="uploaded-photo" alt="Uploaded hair photo" hidden />
+              <video id="camera-video" autoplay playsinline muted hidden></video>
+              <div id="scan-line" class="scan-line" hidden></div>
+              <span class="frame-caption">HAIR PROFILE / 01</span>
+            </div>
+            <div class="visual-note"><span class="note-mark">*</span> A quick visual guide, made from your photo.</div>
+          </div>
+        </section>
+
+        <section id="analysis" class="results-section" hidden>
+          <div class="section-heading">
+            <div><p class="eyebrow"><span class="eyebrow-line"></span> YOUR HAIR PROFILE</p><h2>The details, <em>decoded.</em></h2></div>
+            <button id="change-photo" class="text-button" type="button">Change photo <span aria-hidden="true">↗</span></button>
+          </div>
+          <div id="analysis-error" class="analysis-error" role="alert" hidden></div>
+          <div id="profile-content" class="profile-content" hidden>
+            <div class="profile-banner">
+              <div class="profile-type">
+                <span class="profile-icon" aria-hidden="true">S</span>
+                <div><span class="micro-label">YOUR DETECTED TEXTURE</span><h3 id="hair-type">Wavy Hair</h3></div>
+              </div>
+              <div class="profile-stats">
+                <div><span class="micro-label">TYPE CONFIDENCE</span><strong id="type-confidence">--</strong></div>
+                <div><span class="micro-label">HAIR AREA IN PHOTO</span><strong id="hair-area">--</strong></div>
+                <div class="confidence-track"><span id="confidence-fill"></span></div>
+              </div>
+            </div>
+            <div class="profile-footnote"><span class="small-check">i</span> Estimates can vary with lighting, styling, and photo angle.</div>
+          </div>
+          <div id="condition-assessment" class="condition-assessment" hidden>
+            <div class="condition-heading-row">
+              <div><p class="eyebrow"><span class="eyebrow-line"></span> TRAINED CONDITION SCREEN</p><h3 id="condition-headline">Condition screen</h3></div>
+              <span id="condition-badge" class="condition-badge">--</span>
+            </div>
+            <p id="condition-description" class="condition-description"></p>
+            <div class="condition-metrics">
+              <div><span class="micro-label">GATE RESULT</span><strong id="condition-gate-label">--</strong><span id="condition-gate-confidence" class="condition-confidence">--</span></div>
+              <div id="condition-class-result" hidden><span class="micro-label">POSSIBLE TRAINED CLASS</span><strong id="condition-class-label">--</strong><span id="condition-class-confidence" class="condition-confidence">--</span></div>
+            </div>
+            <details id="condition-probability-details" class="condition-probability-details" hidden>
+              <summary>View all trained disease-class scores</summary>
+              <div id="disease-probabilities" class="disease-probabilities"></div>
+            </details>
+            <div id="condition-guidance" class="condition-guidance" hidden>
+              <h4>Care guidance</h4>
+              <p id="condition-guidance-summary"></p>
+              <ul id="condition-guidance-steps"></ul>
+              <div class="condition-products">
+                <h4>Product ideas to discuss</h4>
+                <ul id="condition-products-list"></ul>
+                <p class="product-caution">These are general product categories, not a diagnosis or prescription. Confirm the cause and check product labels with a clinician or pharmacist, especially for children, pregnancy, allergies, or irritated skin.</p>
+              </div>
+            </div>
+            <p class="medical-disclaimer">Image-model screening only. This is not a medical diagnosis and cannot rule a condition in or out. Consult a qualified healthcare professional for concerns.</p>
+          </div>
+        </section>
+
+        <section id="cuts" class="cuts-section" hidden>
+          <div class="section-heading cuts-heading">
+            <div><p class="eyebrow"><span class="eyebrow-line"></span> HAIRCUT RECOMMENDATIONS</p><h2>Made for your <em>texture.</em></h2></div>
+            <p class="heading-note">Selected for your detected hair type.<br />Face shape and routine are not analyzed.</p>
+          </div>
+          <div class="style-preferences">
+            <div class="style-filter-group">
+              <span class="style-preference-label">STYLE</span>
+              <div id="style-directions" class="style-directions" role="group" aria-label="Filter haircut references"></div>
+            </div>
+            <div class="style-filter-group">
+              <span class="style-preference-label">LENGTH</span>
+              <div id="length-directions" class="style-directions" role="group" aria-label="Filter by haircut length"></div>
+              <span id="visible-hair-length" class="length-estimate"></span>
+            </div>
+            <span class="style-preference-note">Length is estimated from visible hair in the photo. Adjust it if the image is cropped or tied back.</span>
+          </div>
+          <div id="haircut-grid" class="haircut-grid"></div>
+        </section>
+
+        <section id="haircut-preview" class="haircut-preview-section" hidden>
+          <div class="section-heading preview-section-heading">
+            <div><p class="eyebrow"><span class="eyebrow-line"></span> VISUAL PREVIEW</p><h2 id="tryon-title">Try a shape <em>on your photo.</em></h2></div>
+            <button id="close-tryon" class="text-button" type="button">Close preview <span aria-hidden="true">×</span></button>
+          </div>
+          <div class="tryon-layout">
+            <div class="tryon-canvases">
+              <div class="tryon-canvas-card"><span class="canvas-label">YOUR PHOTO</span><canvas id="cut-base-canvas"></canvas></div>
+              <div class="tryon-canvas-card"><span class="canvas-label">CUT REFERENCE</span><img id="cut-reference-image" alt="Selected haircut reference" /></div>
+              <div class="tryon-canvas-card"><span class="canvas-label">TEXTURE GUIDE</span><canvas id="cut-tryon-canvas"></canvas></div>
+            </div>
+            <aside class="tryon-note">
+              <span class="tryon-badge">REFERENCE TEXTURE GUIDE</span>
+              <h3 id="tryon-cut-name">Selected cut</h3>
+              <p id="tryon-cut-description"></p>
+              <div class="tryon-blend-control">
+                <div class="control-label-row"><label for="tryon-blend-slider">Texture strength</label><span id="tryon-blend-value">16%</span></div>
+                <input id="tryon-blend-slider" type="range" min="8" max="50" value="16" />
+              </div>
+              <p class="disclaimer-copy">A subtle reference-texture overlay, clipped to the hair map. It does not simulate a new cut, hairline, or length; use the center photo to compare the actual style.</p>
+            </aside>
+          </div>
+        </section>
+
+        <section id="hair-mapping" class="mapping-section" hidden>
+          <div class="section-heading">
+            <div><p class="eyebrow"><span class="eyebrow-line"></span> HAIR REGION MAPPING</p><h2>Where the model <em>sees hair.</em></h2></div>
+            <p class="heading-note">The tinted overlay is the U-Net hair mask.</p>
+          </div>
+          <div class="mapping-layout">
+            <div class="mapping-image"><canvas id="hair-map-canvas" aria-label="Uploaded image with detected hair regions highlighted"></canvas><span class="mapping-legend"><span></span> Detected hair pixels</span></div>
+            <div class="mapping-details">
+              <span class="micro-label">SEGMENTED AREA</span>
+              <strong id="mapping-area">--</strong>
+              <p>Only pixels inside this region are included in the virtual color preview.</p>
+              <div class="mapping-readout"><span>Image dimensions</span><strong id="image-dimensions">--</strong></div>
+              <div class="mapping-readout"><span>Mask resolution</span><strong>224 × 224</strong></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="color-studio" class="color-section" hidden>
+          <div class="section-heading color-heading">
+            <div><p class="eyebrow"><span class="eyebrow-line"></span> THE COLOR STUDIO</p><h2>Try on a <em>new shade.</em></h2></div>
+            <p class="heading-note">Choose the whole hair or a section, or drag<br />on the photo for a custom area.</p>
+          </div>
+          <div class="studio-layout">
+            <div class="studio-preview">
+              <div class="preview-toolbar"><span>LIVE PREVIEW</span><span id="color-region-label">WHOLE HAIR</span></div>
+              <div id="color-regions" class="color-regions" role="group" aria-label="Select hair section to color">
+                <button type="button" data-color-region="whole" aria-pressed="true">Whole hair</button>
+                <button type="button" data-color-region="scalp" aria-pressed="false">Scalp / roots</button>
+                <button type="button" data-color-region="middle" aria-pressed="false">Middle</button>
+                <button type="button" data-color-region="ends" aria-pressed="false">Ends</button>
+              </div>
+              <div class="canvas-pair">
+                <div class="comparison-card">
+                  <div id="comparison-stage" class="comparison-stage" aria-label="Before and color preview comparison">
+                    <canvas id="before-canvas" aria-label="Original photo"></canvas>
+                    <div id="after-clip" class="after-clip"><canvas id="after-canvas" aria-label="Color preview; drag to select an area"></canvas></div>
+                    <span class="canvas-label before-label">BEFORE</span>
+                    <span class="canvas-label after-label">AFTER</span>
+                    <span id="comparison-divider" class="comparison-divider" aria-hidden="true"></span>
+                    <span class="drag-hint">Drag photo to select an area</span>
+                  </div>
+                  <div class="comparison-range">
+                    <label for="comparison-slider">Before</label>
+                    <input id="comparison-slider" type="range" min="0" max="100" value="50" aria-label="Compare original at 0 to color preview at 100" />
+                    <span>After</span>
+                  </div>
+                </div>
+              </div>
+              <div class="preview-actions"><span id="selection-label">Full hair selected</span><button id="download-preview" class="download-button" type="button" disabled><span aria-hidden="true">↓</span> Download preview</button></div>
+            </div>
+            <aside class="color-controls">
+              <div class="control-label-row"><span class="control-title">Choose your shade</span><span id="selected-color-name" class="selected-color-name">Espresso</span></div>
+              <div id="color-families" class="color-families" role="tablist" aria-label="Color families"></div>
+              <div id="color-palette" class="color-palette" aria-label="Available hair colors"></div>
+              <div class="blend-control"><div class="control-label-row"><label for="blend-slider">Color intensity</label><span id="blend-value">88%</span></div><input id="blend-slider" type="range" min="30" max="100" value="88" /></div>
+              <p class="color-disclaimer">Photo-based try-on that keeps your lighting and strand detail. Salon results vary by starting shade and process; very dark hair may need lightening for brighter colors.</p>
+            </aside>
+          </div>
+        </section>
+
+        <section id="diagnostics" class="diagnostics-section" hidden>
+          <details class="diagnostics-panel" open>
+            <summary><span><span class="eyebrow"><span class="eyebrow-line"></span> DIAGNOSTICS &amp; ANALYSIS</span><strong>Model diagnostics and analysis</strong></span><span class="details-toggle" aria-hidden="true">+</span></summary>
+            <div class="diagnostics-content">
+              <div class="diagnostic-grid">
+                <article class="diagnostic-card"><span class="micro-label">HAIR DETECTION</span><strong id="diag-hair-score">--</strong><div class="diagnostic-track"><span id="diag-hair-fill"></span></div><small id="diag-hair-model">MobileNetV2 · test accuracy 98.00%</small></article>
+                <article class="diagnostic-card"><span class="micro-label">NON-HAIR SCORE</span><strong id="diag-nonhair-score">--</strong><div class="diagnostic-track"><span id="diag-nonhair-fill"></span></div><small>Hair presence gate</small></article>
+                <article class="diagnostic-card"><span class="micro-label">HAIR TYPE</span><strong id="diag-type-score">--</strong><div class="diagnostic-track"><span id="diag-type-fill"></span></div><small>MobileNetV2 · test accuracy 76.47%</small></article>
+                <article class="diagnostic-card"><span class="micro-label">SEGMENTATION</span><strong id="diag-hair-area">--</strong><div class="diagnostic-track"><span id="diag-area-fill"></span></div><small>U-Net · test Dice 92.03% · IoU 85.97%</small></article>
+              </div>
+              <div class="probability-section"><div class="control-label-row"><h3>Hair-type probabilities</h3><span>Scores from the current image</span></div><div id="type-probabilities" class="type-probabilities"></div></div>
+              <div class="technical-footer"><span><b>Input:</b> RGB image resized to 224 × 224 for classification</span><span><b>Segmentation:</b> predicted mask resized to source image dimensions</span><span><b>Condition gate:</b> MobileNetV2 · test accuracy 99.05%</span><span><b>Disease classifier:</b> MobileNetV2 · test accuracy 99.92%</span><span><b>Interpretation:</b> dataset test scores do not guarantee real-world performance</span></div>
+            </div>
+          </details>
+        </section>
+
+        <footer class="page-footer">
+          <a class="brand footer-brand" href="#top"><span class="brand-mark">S</span><span class="brand-name">STYLE STRAND AI</span></a>
+          <span>A little cut. A new color. Your call.</span>
+          <a href="#top" class="back-top">BACK TO TOP ↑</a>
+        </footer>
+      </main>
+    </div>
+    <script src="./script.js"></script>
+  </body>
+</html>
