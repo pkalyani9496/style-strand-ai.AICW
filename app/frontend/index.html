@@ -47,7 +47,7 @@
               <button id="start-camera" class="camera-button" type="button"><span aria-hidden="true">◉</span> Live camera</button>
             </div>
             <input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" />
-            <p class="file-hint">JPG, PNG or WEBP · processed in this session</p>
+            <p class="file-hint">JPG, PNG or WEBP · crop before analysis</p>
             <p id="upload-status" class="upload-status" role="status" aria-live="polite"></p>
             <div id="camera-controls" class="camera-controls" hidden>
               <button id="capture-camera" class="capture-button" type="button">Capture photo</button>
@@ -72,6 +72,33 @@
             <div class="visual-note"><span class="note-mark">*</span> A quick visual guide, made from your photo.</div>
           </div>
         </section>
+
+        <dialog id="crop-dialog" class="crop-dialog" aria-labelledby="crop-title" aria-describedby="crop-instructions">
+          <div class="crop-dialog-content">
+            <div class="crop-dialog-heading">
+              <div>
+                <p class="eyebrow"><span class="eyebrow-line"></span> FRAME YOUR PHOTO</p>
+                <h2 id="crop-title">Crop out the background.</h2>
+              </div>
+              <button id="crop-close" class="crop-close" type="button" aria-label="Cancel cropping">×</button>
+            </div>
+            <p id="crop-instructions" class="crop-instructions">Drag across the photo to select the area you want to keep.</p>
+            <div class="crop-stage-wrap">
+              <div id="crop-stage" class="crop-image-stage">
+                <img id="crop-image" alt="Select the part of your photo to keep" draggable="false" />
+                <div id="crop-selection" class="crop-selection" aria-hidden="true" hidden></div>
+              </div>
+            </div>
+            <p id="crop-status" class="crop-status" role="status" aria-live="polite">No crop area selected.</p>
+            <div class="crop-actions">
+              <button id="crop-reset" class="crop-secondary-button" type="button" disabled>Reset selection</button>
+              <div>
+                <button id="crop-cancel" class="crop-secondary-button" type="button">Cancel</button>
+                <button id="crop-apply" class="crop-apply-button" type="button" disabled>Use this crop</button>
+              </div>
+            </div>
+          </div>
+        </dialog>
 
         <section id="analysis" class="results-section" hidden>
           <div class="section-heading">

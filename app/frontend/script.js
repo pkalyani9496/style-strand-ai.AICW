@@ -66,6 +66,13 @@ const elements = {
   uploadStatus: document.querySelector("#upload-status"),
   cameraStatus: document.querySelector("#camera-status"),
   uploadedPhoto: document.querySelector("#uploaded-photo"),
+  cropDialog: document.querySelector("#crop-dialog"),
+  cropImage: document.querySelector("#crop-image"),
+  cropStage: document.querySelector("#crop-stage"),
+  cropSelection: document.querySelector("#crop-selection"),
+  cropStatus: document.querySelector("#crop-status"),
+  cropReset: document.querySelector("#crop-reset"),
+  cropApply: document.querySelector("#crop-apply"),
   cameraVideo: document.querySelector("#camera-video"),
   cameraControls: document.querySelector("#camera-controls"),
   startCamera: document.querySelector("#start-camera"),
@@ -122,6 +129,9 @@ let maskImage = null;
 let activeHaircut = null;
 let cameraStream = null;
 let selection = null;
+let pendingPhoto = null;
+let cropStart = null;
+let cropSelection = null;
 let activeFamily = "Brunette";
 let activePresentation = "Feminine";
 let activeLength = "All lengths";
@@ -186,6 +196,149 @@ function submitImage(imageData, filename) {
   });
 }
 
+function updateCropSelection(point) {
+  if (!cropStart || !point) {
+    elements.cropSelection.hidden = true;
+    elements.cropApply.disabled = true;
+    return;
+  }
+
+  const left = Math.min(cropStart.x, point.x);
+  const top = Math.min(cropStart.y, point.y);
+  const width = Math.abs(point.x - cropStart.x);
+  const height = Math.abs(point.y - cropStart.y);
+  cropSelection = { left, top, width, height };
+  elements.cropSelection.hidden = false;
+  elements.cropSelection.style.left = `${left}px`;
+  elements.cropSelection.style.top = `${top}px`;
+  elements.cropSelection.style.width = `${width}px`;
+  elements.cropSelection.style.height = `${height}px`;
+  elements.cropApply.disabled = width < 24 || height < 24;
+  elements.cropReset.disabled = false;
+  elements.cropStatus.textContent = elements.cropApply.disabled
+    ? "Drag to select a larger area."
+    : `Selected area: ${Math.round(width)} × ${Math.round(height)} pixels.`;
+}
+
+function resetCropSelection() {
+  cropStart = null;
+  cropSelection = null;
+  elements.cropSelection.hidden = true;
+  elements.cropReset.disabled = true;
+  elements.cropApply.disabled = true;
+  elements.cropStatus.textContent = "No crop area selected.";
+}
+
+async function openCropDialog(imageData, filename) {
+  pendingPhoto = { imageData, filename };
+  elements.cropImage.src = imageData;
+
+  if (!elements.cropImage.complete || !elements.cropImage.naturalWidth) {
+    await new Promise((resolve, reject) => {
+      elements.cropImage.addEventListener("load", resolve, { once: true });
+      elements.cropImage.addEventListener(
+        "error",
+        () => reject(new Error("Could not display that image.")),
+        { once: true },
+      );
+    });
+  }
+
+  resetCropSelection();
+  elements.cropDialog.showModal();
+}
+
+function cropPoint(event) {
+  const bounds = elements.cropStage.getBoundingClientRect();
+  return {
+    x: Math.max(0, Math.min(bounds.width, event.clientX - bounds.left)),
+    y: Math.max(0, Math.min(bounds.height, event.clientY - bounds.top)),
+  };
+}
+
+elements.cropStage.addEventListener("pointerdown", (event) => {
+  if (event.button !== 0) return;
+  event.preventDefault();
+  cropStart = cropPoint(event);
+  elements.cropStage.setPointerCapture(event.pointerId);
+  updateCropSelection(cropStart);
+});
+elements.cropStage.addEventListener("pointermove", (event) => {
+  if (cropStart) updateCropSelection(cropPoint(event));
+});
+elements.cropStage.addEventListener("pointerup", (event) => {
+  if (cropStart) updateCropSelection(cropPoint(event));
+  cropStart = null;
+});
+elements.cropStage.addEventListener("pointercancel", () => {
+  cropStart = null;
+});
+elements.cropReset.addEventListener("click", resetCropSelection);
+
+function closeCropDialog() {
+  elements.cropDialog.close();
+}
+
+document.querySelector("#crop-cancel").addEventListener("click", closeCropDialog);
+document.querySelector("#crop-close").addEventListener("click", closeCropDialog);
+elements.cropDialog.addEventListener("close", () => {
+  if (pendingPhoto) {
+    elements.uploadStatus.textContent = "Cropping cancelled. Your previous photo is unchanged.";
+  }
+  pendingPhoto = null;
+  elements.cropImage.removeAttribute("src");
+  elements.uploadLabel.textContent = elements.uploadedPhoto.hidden
+    ? "Choose a photo"
+    : "Choose another photo";
+});
+
+elements.cropApply.addEventListener("click", () => {
+  if (!pendingPhoto || !cropSelection) return;
+
+  const scaleX = elements.cropImage.naturalWidth / elements.cropStage.clientWidth;
+  const scaleY = elements.cropImage.naturalHeight / elements.cropStage.clientHeight;
+  const sourceX = Math.round(cropSelection.left * scaleX);
+  const sourceY = Math.round(cropSelection.top * scaleY);
+  const sourceWidth = Math.min(
+    elements.cropImage.naturalWidth - sourceX,
+    Math.round(cropSelection.width * scaleX),
+  );
+  const sourceHeight = Math.min(
+    elements.cropImage.naturalHeight - sourceY,
+    Math.round(cropSelection.height * scaleY),
+  );
+  if (sourceWidth < 1 || sourceHeight < 1) {
+    elements.cropStatus.textContent = "Select a valid area of the photo and try again.";
+    return;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = sourceWidth;
+  canvas.height = sourceHeight;
+  const context = canvas.getContext("2d");
+  if (!context) {
+    elements.cropStatus.textContent = "Photo cropping is unavailable in this browser.";
+    return;
+  }
+  context.drawImage(
+    elements.cropImage,
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    0,
+    0,
+    canvas.width,
+    canvas.height,
+  );
+
+  const croppedPhoto = canvas.toDataURL("image/jpeg", 0.88);
+  const { filename } = pendingPhoto;
+  pendingPhoto = null;
+  closeCropDialog();
+  submitImage(croppedPhoto, filename);
+});
+
 function stopCamera() {
   cameraStream?.getTracks().forEach((track) => track.stop());
   cameraStream = null;
@@ -234,11 +387,19 @@ document.querySelector("#capture-camera").addEventListener("click", () => {
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(video.videoWidth * scale);
   canvas.height = Math.round(video.videoHeight * scale);
-  canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+  const context = canvas.getContext("2d");
+  if (!context) {
+    elements.cameraStatus.textContent = "Photo capture is unavailable in this browser.";
+    return;
+  }
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
   const imageData = canvas.toDataURL("image/jpeg", 0.88);
   stopCamera();
-  elements.cameraStatus.textContent = "Camera photo captured.";
-  submitImage(imageData, "Live camera photo");
+  elements.cameraStatus.textContent = "Camera photo captured. Crop it before analysis.";
+  openCropDialog(imageData, "Live camera photo").catch((error) => {
+    pendingPhoto = null;
+    elements.cameraStatus.textContent = error.message;
+  });
 });
 
 window.addEventListener("beforeunload", () => {
@@ -277,10 +438,17 @@ elements.upload.addEventListener("change", async (event) => {
   stopCamera();
   try {
     const imageData = await compressImage(file);
-    submitImage(imageData, file.name);
+    await openCropDialog(imageData, file.name);
   } catch (error) {
-    elements.uploadStatus.textContent = error.message;
-    elements.uploadLabel.textContent = "Choose a photo";
+    pendingPhoto = null;
+    elements.uploadStatus.textContent = error instanceof Error
+      ? error.message
+      : "Could not prepare that image.";
+    elements.uploadLabel.textContent = elements.uploadedPhoto.hidden
+      ? "Choose a photo"
+      : "Choose another photo";
+  } finally {
+    elements.upload.value = "";
   }
 });
 
